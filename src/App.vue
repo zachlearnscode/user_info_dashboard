@@ -2,6 +2,7 @@
   import { onMounted, ref } from "vue";
   import TableHeader from "./components/TableHeader.vue";
   import { instance as axios } from "./services/axios_instance";
+  import AddUserForm from "./components/addUserForm.vue";
 
   const users = ref([]);
   const selectedUsers = ref([]);
@@ -46,14 +47,14 @@
 
   <Dialog v-model:visible="openAddUserDialog">
     <template #header>
-      <h3>Header</h3>
+      <h3>Create New User</h3>
     </template>
 
-    Content
+    <AddUserForm></AddUserForm>
 
     <template #footer>
       <Button label="No" icon="pi pi-times" class="p-button-text"/>
-          <Button label="Yes" icon="pi pi-check" autofocus />
+      <Button label="Yes" icon="pi pi-check" autofocus />
     </template>
   </Dialog>
 </template>
