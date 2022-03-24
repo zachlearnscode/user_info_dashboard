@@ -8,6 +8,16 @@
   const selectedUsers = ref([]);
 
   const openAddUserDialog = ref(false);
+  const addNewUser = (evt) => {
+    axios.post("/users", evt)
+      .then(res => {
+        //Should I be checking status codes?
+        const newUser = res.data;
+        users.value.push(newUser);
+        openAddUserDialog.value = false;
+      })
+      .catch(err => console.log("Error in addUserForm: ", err))
+  }
 
   onMounted(() => {
     axios.get("/users")
@@ -45,17 +55,15 @@
     </Column>
   </DataTable>
 
-  <Dialog v-model:visible="openAddUserDialog">
+  <Dialog modal dismissableMask closeOnEscape :breakpoints="{'960px': '75vw', '640px': '100vw'}" :style="{width: '50vw'}" v-model:visible="openAddUserDialog">
     <template #header>
-      <h3>Create New User</h3>
+      <div class="flex-column">
+        <h3>Create New User</h3>
+        <p class="my-0">All fields are required.</p>
+      </div>
     </template>
 
-    <AddUserForm></AddUserForm>
-
-    <template #footer>
-      <Button label="No" icon="pi pi-times" class="p-button-text"/>
-      <Button label="Yes" icon="pi pi-check" autofocus />
-    </template>
+    <AddUserForm class="mt-3" @newUserSubmitted="addNewUser($event)" @closeAddUserDialog="openAddUserDialog = false"></AddUserForm>
   </Dialog>
 </template>
 
