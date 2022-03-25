@@ -1,42 +1,25 @@
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import useVuelidate from '@vuelidate/core'
 import { required, email } from '@vuelidate/validators'
+import FormInput from "./FormInput.vue";
 
 const emit = defineEmits(['newUserSubmitted']);
 const submitted = ref(false);
-
-const toTitleCase = (str) => {
-    const strArr = str.split(" ");
-
-    let result = "";
-    strArr.forEach(str => {
-        const strUpper = str.toUpperCase();
-        const strLower = str.toLowerCase();
-
-        result += strUpper.slice(0,1);
-        result += strLower.slice(1) + " ";
-    })
-    
-    return result.trim();
-}
 
 const inputs = ref({
     name: "",
     username: "",
     email: "",
-    address: {
-        street: "",
-        suite: "",
-        city: "",
-        zipcode: ""
-    },
+    street: "",
+    suite: "",
+    city: "",
+    zip_code: "",
     phone: "",
     website: "",
-    company: {
-        name: "",
-        catchPhrase: ""
-    }
+    name: "",
+    catch_phrase: ""
+
 });
 
 const validations = () => {
@@ -44,18 +27,14 @@ const validations = () => {
         name: { required },
         username: {},
         email: { required, email },
-        address: {
-            street: {},
-            suite: {},
-            city: {},
-            zipcode: {}
-        },
+        street: {},
+        suite: {},
+        city: {},
+        zipcode: {},
         phone: { required },
         website: { required },
-        company: {
-            name: { required },
-            catchPhrase: {}
-        }
+        name: { required },
+        catchPhrase: {}
     }
 }
 
@@ -70,22 +49,47 @@ const onSubmit = (isFormValid) => {
 
     emit('newUserSubmitted', inputs.value);
 }
+
+const accessProperty = (arr) => {
+    let pointer = 'inputs.';
+
+    arr.forEach((prop, i) => {
+        pointer += prop;
+        if (i !== arr.length - 1) {
+            pointer += '.';
+        }
+    })
+
+    return `${pointer}`
+}
 </script>
 
 <template>
     <form @submit.prevent="onSubmit(!v$.$invalid)" class="formgrid grid">
+        <div v-for="(value, key) in inputs" :key="key" class="field col-12 p-float-label">
+            <FormInput
+                :name="key"
+                :submitted="submitted"
+                v-model="inputs[key]"
+                :validations="v$[key]"
+                :type="'text'"                
+            ></FormInput>
+        </div>
+        
+
+
+
+
+
+
+
+
+
+
+
+<!-- 
         <div class="field col-12 p-float-label">
-            <InputText
-                id="name"
-                type="text"
-                autofocus
-                v-model="inputs.name"
-                class="inputfield w-full"
-            />
-            <label for="name">Name*</label>
-            <div class="input-errors" v-for="error of v$.name.$errors" :key="error.$uid">
-                <div class="error-msg">{{ error.$message }}</div>
-            </div>
+            <FormInput :name="'Name'" :type="'text'" :autofocus="true" :validations="v$.name" :submitted="submitted"></FormInput>
         </div>
         <div class="field col-12 md:col-6 p-float-label">
             <InputText
@@ -169,7 +173,7 @@ const onSubmit = (isFormValid) => {
                 class="inputfield w-full"
             />
             <label for="motto">Company Motto</label>
-        </div>
+        </div> -->
 
         <div class="ml-auto mr-2">
             <Button label="Cancel" @click="$emit('closeAddUserDialog')" class="p-button-text" />
