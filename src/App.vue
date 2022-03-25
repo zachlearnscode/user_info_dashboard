@@ -59,7 +59,7 @@
     <template #header>
       <div class="flex-column">
         <h3>Create New User</h3>
-        <p class="my-0">All fields are required.</p>
+        <p class="my-0">Fields marked with * are required.</p>
       </div>
     </template>
 
