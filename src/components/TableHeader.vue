@@ -17,6 +17,7 @@
         label="View/Edit Details"
         :disabled="disableButtons"
         class="p-button-rounded p-button-info mx-1"
+        @click="$emit('openDetailsSidebar')"
       />
       <Button
         label="Delete User(s)"

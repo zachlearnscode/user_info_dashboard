@@ -3,21 +3,24 @@
   import TableHeader from "./components/TableHeader.vue";
   import { instance as axios } from "./services/axios_instance";
   import AddUserForm from "./components/addUserForm.vue";
+  import DetailsSidebar from "./components/DetailsSidebar.vue";
 
   const users = ref([]);
-  const selectedUsers = ref([]);
-
-  const openAddUserDialog = ref(false);
-
-  const addNewUser = user => {
-    users.value.push(user);
-  };
-
   onMounted(() => {
     axios.get("/users")
       .then(res => users.value = res.data)
       .catch(err => console.log("Oops: ", err)) // TODO: Handle error
   })
+
+  const selectedUsers = ref([]);
+
+  const openAddUserDialog = ref(false);
+  const openDetailsSidebar = ref(false);
+
+  const addNewUser = user => {
+    users.value.push(user);
+  };
+
   
 </script>
 
@@ -28,7 +31,7 @@
     </template>
 
     <template #header>
-      <TableHeader :disableButtons="selectedUsers.length === 0" @openAddUserDialog="openAddUserDialog = true"/>
+      <TableHeader :disableButtons="selectedUsers.length === 0" @openAddUserDialog="openAddUserDialog = true" @openDetailsSidebar="openDetailsSidebar = true"/>
     </template>
 
     <Column selectionMode="multiple" :exportable="false"></Column>      
@@ -59,6 +62,7 @@
 
     <AddUserForm class="mt-3" @addNewUser="[addNewUser($event), openAddUserDialog = false]" @closeAddUserDialog="openAddUserDialog = false"></AddUserForm>
   </Dialog>
+  <DetailsSidebar v-model="openDetailsSidebar" :userData="selectedUsers"></DetailsSidebar>
 </template>
 
 <style>

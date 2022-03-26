@@ -13,6 +13,8 @@ import Column from 'primevue/column';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Dialog from 'primevue/dialog';
+import Sidebar from 'primevue/sidebar';
+import Card from 'primevue/card';
 
 // PrimeFlex CSS
 import '/node_modules/primeflex/primeflex.css';
@@ -27,5 +29,7 @@ app.component('Column', Column);
 app.component('Button', Button);
 app.component('InputText', InputText);
 app.component('Dialog', Dialog);
+app.component('Sidebar', Sidebar);
+app.component('Card', Card);
 
 app.mount('#app');
