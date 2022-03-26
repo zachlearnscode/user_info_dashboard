@@ -1,4 +1,5 @@
 <script setup>
+import { computed } from "vue";
 import InputError from "./InputError.vue";
 
 const props = defineProps({
@@ -30,6 +31,10 @@ const props = defineProps({
 
 defineEmits(['update:modelValue'])
 
+const invalid = computed(() => {
+  return props.validations.$invalid;
+})
+
 const toTitleCase = (str) => {
   const strArr = str.split("_");
 
@@ -47,14 +52,30 @@ const toTitleCase = (str) => {
 </script>
 
 <template>
+  <!-- v-model on component prevents floating label from returning to input when input has content  -->
   <InputText
     :value="modelValue"
     @input="$emit('update:modelValue', $event.target.value)"
     :id="name"
     :type="type"
     :autofocus="autofocus"
+    v-model="modelValue"
     class="inputfield w-full"
   />
-  <label :for="name">{{ toTitleCase(name) }}</label>
-  <!-- <InputError :validations="validations" :submited="submitted" :name="name"></InputError> -->
+  <label :for="name">{{ validations.required ? toTitleCase(name) + "*" : toTitleCase(name) }}</label>
+  <Transition>
+    <InputError v-if="invalid && submitted" :name="toTitleCase(name)"></InputError>
+  </Transition>
 </template>
+
+<style scoped>
+.v-enter-active,
+.v-leave-active {
+  transition: opacity 0.5s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+  opacity: 0;
+}
+</style>

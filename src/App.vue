@@ -8,16 +8,10 @@
   const selectedUsers = ref([]);
 
   const openAddUserDialog = ref(false);
-  const addNewUser = (evt) => {
-    axios.post("/users", evt)
-      .then(res => {
-        //Should I be checking status codes?
-        const newUser = res.data;
-        users.value.push(newUser);
-        openAddUserDialog.value = false;
-      })
-      .catch(err => console.log("Error in addUserForm: ", err))
-  }
+
+  const addNewUser = user => {
+    users.value.push(user);
+  };
 
   onMounted(() => {
     axios.get("/users")
@@ -63,7 +57,7 @@
       </div>
     </template>
 
-    <AddUserForm class="mt-3" @newUserSubmitted="addNewUser($event)" @closeAddUserDialog="openAddUserDialog = false"></AddUserForm>
+    <AddUserForm class="mt-3" @addNewUser="[addNewUser($event), openAddUserDialog = false]" @closeAddUserDialog="openAddUserDialog = false"></AddUserForm>
   </Dialog>
 </template>
 

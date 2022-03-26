@@ -1,10 +1,12 @@
 <script setup>
 import { ref, computed } from "vue";
+import { instance as axios } from "../services/axios_instance";
 import useVuelidate from '@vuelidate/core'
 import { required, email } from '@vuelidate/validators'
 import FormInput from "./FormInput.vue";
 
-const emit = defineEmits(['newUserSubmitted']);
+const emit = defineEmits(['addNewUser', 'closeAddUserDialog']);
+
 const submitted = ref(false);
 
 const inputs = ref({
@@ -17,10 +19,24 @@ const inputs = ref({
     zip_code: "",
     phone: "",
     website: "",
-    name: "",
-    catch_phrase: ""
+    company_name: "",
+    company_motto: ""
 
 });
+
+const inputClasses = ref({
+    name: "col-12",
+    username: "col-12 md:col-6",
+    email: "col-12 md:col-6",
+    street: "col-8 md:col-9",
+    suite: "col-4 md:col-3",
+    city: "col-8 md:col-9",
+    zip_code: "col-4 md:col-3",
+    phone: "col-12 md:col-6",
+    website: "col-12 md:col-6",
+    company_name: "col-12 md:col-7",
+    company_motto: "col-12 md:col-5"
+})
 
 const validations = () => {
     return {
@@ -30,150 +46,94 @@ const validations = () => {
         street: {},
         suite: {},
         city: {},
-        zipcode: {},
+        zip_code: {},
         phone: { required },
         website: { required },
-        name: { required },
-        catchPhrase: {}
+        company_name: { required },
+        company_motto: {}
     }
 }
 
 const v$ = useVuelidate(validations, inputs.value);
 
-const onSubmit = (isFormValid) => {
-    submitted.value = true;
-
-    if (!isFormValid) {
-        return;
+const formattedInputs = computed(() => {
+    const result = {
+        address: {geo: {lat: null, lng: null}},
+        company: {bs: null}
     }
 
-    emit('newUserSubmitted', inputs.value);
-}
+    const entries = Object.entries(inputs.value);
+    const entriesWithNulls = entries.map(entry => {
+        let [key, value] = entry;
+        if (value === "") {
+            value = null;
+        }
+        return [key, value];
+    })
 
-const accessProperty = (arr) => {
-    let pointer = 'inputs.';
+    entriesWithNulls.forEach(entry => {
+        let [key, value] = entry;
 
-    arr.forEach((prop, i) => {
-        pointer += prop;
-        if (i !== arr.length - 1) {
-            pointer += '.';
+        if (key.includes("_")) {
+            key = key.split("_").join("");
+        }
+
+        switch(key) {
+            case "street":
+            case "suite":
+            case "city":
+            case "zipcode": {
+                result.address[key] = value;
+                break;
+            }
+            case "companyname": {
+                result.company["name"] = value;
+                break;
+            }
+            case "companymotto": {
+                result.company["catchPhrase"] = value;
+                break;
+            }
+            default: {
+                result[key] = value;
+            }
         }
     })
 
-    return `${pointer}`
+    return result;
+})
+
+const onSubmit = (isFormValid) => {
+    submitted.value = true;
+
+    if (isFormValid) {
+        axios.post("/users", formattedInputs.value)
+            .then(res => {
+                //Should I be checking status codes?
+                const newUser = res.data;
+                emit('addNewUser', newUser);
+            })
+            .catch(err => console.log("Error in addUserForm: ", err))
+    }
 }
 </script>
 
 <template>
     <form @submit.prevent="onSubmit(!v$.$invalid)" class="formgrid grid">
-        <div v-for="(value, key) in inputs" :key="key" class="field col-12 p-float-label">
+        <span
+            v-for="(value, key) in inputs"
+            :key="key"
+            class="field p-float-label"
+            :class="inputClasses[key]"
+        >
             <FormInput
                 :name="key"
                 :submitted="submitted"
                 v-model="inputs[key]"
                 :validations="v$[key]"
-                :type="'text'"                
+                :type="'text'"
             ></FormInput>
-        </div>
-        
-
-
-
-
-
-
-
-
-
-
-
-<!-- 
-        <div class="field col-12 p-float-label">
-            <FormInput :name="'Name'" :type="'text'" :autofocus="true" :validations="v$.name" :submitted="submitted"></FormInput>
-        </div>
-        <div class="field col-12 md:col-6 p-float-label">
-            <InputText
-                id="username"
-                type="text"
-                v-model="inputs.username"
-                class="inputfield w-full"
-            />
-            <label for="username">Username</label>
-        </div>
-        <div class="field col-12 md:col-6 p-float-label">
-            <InputText id="website" type="text" v-model="inputs.website" class="inputfield w-full" />
-            <label for="website">Website*</label>
-        </div>
-        <div class="field col-12 md:col-6 p-float-label">
-            <InputText id="phone" type="tel" v-model="inputs.phone" class="inputfield w-full" />
-            <label for="phone">Phone*</label>
-        </div>
-        <div class="field col-12 md:col-6 p-float-label">
-            <InputText
-                id="email"
-                type="text"
-                v-model="inputs.email"
-                @blur="v$.email.$touch"
-                class="inputfield w-full"
-                :class="{'p-invalid':v$.email.$invalid && submitted}"
-            />
-            <label for="email" :class="{'p-error':v$.email.$invalid && submitted}">Email*</label>
-            <small v-if="v$.email.$invalid && submitted" class="p-error">{{`${toTitleCase(v$.email.$path)} is invalid.`}}</small>
-        </div>
-        <div class="field col-8 md:col-10 p-float-label">
-            <InputText
-                id="street"
-                type="text"
-                v-model="inputs.address.street"
-                class="inputfield w-full"
-            />
-            <label for="street">Street Address</label>
-        </div>
-        <div class="field col-4 md:col-2 p-float-label">
-            <InputText
-                id="ste"
-                type="text"
-                v-model="inputs.address.suite"
-                class="inputfield w-full"
-            />
-            <label for="ste">Ste.</label>
-        </div>
-        <div class="field col-8 md:col-10 p-float-label">
-            <InputText
-                id="city"
-                type="text"
-                v-model="inputs.address.city"
-                class="inputfield w-full"
-            />
-            <label for="city">City</label>
-        </div>
-        <div class="field col-4 md:col-2 p-float-label">
-            <InputText
-                id="zip"
-                type="text"
-                v-model="inputs.address.zipcode"
-                class="inputfield w-full"
-            />
-            <label for="zip">Zip Code</label>
-        </div>
-        <div class="field col-12 md:col-6 p-float-label">
-            <InputText
-                id="company"
-                type="text"
-                v-model="inputs.company.name"
-                class="inputfield w-full"
-            />
-            <label for="company">Company*</label>
-        </div>
-        <div class="field col-12 md:col-6 p-float-label">
-            <InputText
-                id="motto"
-                type="text"
-                v-model="inputs.company.catchPhrase"
-                class="inputfield w-full"
-            />
-            <label for="motto">Company Motto</label>
-        </div> -->
+        </span>
 
         <div class="ml-auto mr-2">
             <Button label="Cancel" @click="$emit('closeAddUserDialog')" class="p-button-text" />
