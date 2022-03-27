@@ -1,11 +1,26 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onBeforeMount } from "vue";
 import { instance as axios } from "../services/axios_instance";
 import useVuelidate from '@vuelidate/core'
 import { required, email } from '@vuelidate/validators'
 import FormInput from "./FormInput.vue";
 
-const emit = defineEmits(['addNewUser', 'closeAddUserDialog']);
+const props = defineProps({
+    userDetails: {
+        type: Object,
+        required: false
+    }
+})
+const emit = defineEmits(['userDetailsFormSubmit', 'userDetailsFormClose']);
+
+onBeforeMount(() => {
+    if (props.userDetails) {
+        const inputKeys = Object.keys(inputs.value);
+        inputKeys.forEach(key => {
+            inputs.value[key] = props.userDetails[key];
+        })
+    }
+})
 
 const submitted = ref(false);
 
@@ -56,13 +71,13 @@ const validations = () => {
 
 const v$ = useVuelidate(validations, inputs.value);
 
-const formattedInputs = computed(() => {
+const formatInputs = (obj) => {
     const result = {
         address: {geo: {lat: null, lng: null}},
         company: {bs: null}
     }
 
-    const entries = Object.entries(inputs.value);
+    const entries = Object.entries(obj);
     const entriesWithNulls = entries.map(entry => {
         let [key, value] = entry;
         if (value === "") {
@@ -101,7 +116,7 @@ const formattedInputs = computed(() => {
     })
 
     return result;
-})
+}
 
 const onSubmit = (isFormValid) => {
     submitted.value = true;
@@ -116,10 +131,11 @@ const onSubmit = (isFormValid) => {
             .catch(err => console.log("Error in addUserForm: ", err))
     }
 }
+
 </script>
 
 <template>
-    <form @submit.prevent="onSubmit(!v$.$invalid)" class="formgrid grid">
+    <form @submit.prevent="onSubmit(!v$.$invalid)" class="formgrid grid mt-3">
         <span
             v-for="(value, key) in inputs"
             :key="key"

@@ -1,5 +1,8 @@
 <script setup>
-import { computed } from "vue";
+import { ref, computed } from "vue";
+import List from "./List.vue";
+import FormDialog from "./FormDialog.vue";
+
 
 const props = defineProps({
   user: {
@@ -8,42 +11,57 @@ const props = defineProps({
   }
 })
 
-const flattenEntries = (arr, parentProperties = []) => {
-  let result = [];
+const openEditUserDialog = ref(false);
 
-  arr.forEach(entry => {
-    let [key, value] = entry;
-    if (typeof value !== 'object') {
-      if (parentProperties.length) {
-        result.push([...parentProperties, ...entry]);
-      } else {
-        result.push([...entry]);
-      }
-    } else {
-      parentProperties.push(key);
-      result.push(...flattenEntries(Object.entries(value), parentProperties));
-      parentProperties = []
+const listItems = computed(() => {
+  return getDepth(props.user);
+})
+
+const getDepth = (obj, count = 1) => {
+  for (let key in obj) {
+    if (typeof obj[key] === 'object') {
+      obj[key].depth = count;
+      getDepth(obj[key], count + 1);
+      count - 1;
     }
-  })
-
-  return result;
+  }
+  return obj;
 }
 
-const flattenedUserData = computed(() => {
-  return flattenEntries(Object.entries(props.user));
-})
+const getFormData = () => {
+  const u = props.user;
+
+  return {
+    name: u.name,
+    username: u.username,
+    email: u.email,
+    street: u.address.street,
+    suite: u.address.suite,
+    city: u.address.city,
+    zip_code: u.address.zipcode,
+    phone: u.phone,
+    website: u.website,
+    company_name: u.company.name,
+    company_motto: u.company.catchPhrase
+  }
+}
 </script>
 
 <template>
-<Card>
-  <template #header>
-    {{user.name}}
-  </template>
-  <template #content>
-    <div v-for="(data, i) in flattenedUserData" :key="i" class="flex justify-content-between">
-      <span :class="`ml-${2 * (data.length - 2)} mr-2`">{{data[data.length - 2]}}</span>
-      <span :class="text-right">{{data[data.length - 1]}}</span>
-    </div>
-  </template>
-</Card>
+  <Card class="my-3 shadow-5" style="background-color:rgba(63, 81, 181, 0.12);">
+    <template #title>
+      <h3 class="my-1">{{ user.name }}</h3>
+    </template>
+    <template #content>
+      <List :listItems="listItems"></List>
+    </template>
+    <template #footer>
+      <div class="flex">
+        <Button label="Delete User" class="w-full p-button-danger" />
+        <Button label="Edit User" @click="openEditUserDialog = true" class="w-full p-button-primary" style="margin-left: .5em" />
+      </div>
+    </template>
+  </Card>
+
+  <FormDialog :title="'Edit User'" v-model="openEditUserDialog" :form="'editUser'" :formData="getFormData()"></FormDialog>
 </template>

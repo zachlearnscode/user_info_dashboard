@@ -10,19 +10,19 @@
       <h2 class="mr-2">Users</h2>
       <Button
         label="Add User"
-        class="p-button-rounded p-button-success mx-1"
+        class="p-button-success mx-1"
         @click="$emit('openAddUserDialog')"
       />
       <Button
         label="View/Edit Details"
         :disabled="disableButtons"
-        class="p-button-rounded p-button-info mx-1"
+        class="p-button-info mx-1"
         @click="$emit('openDetailsSidebar')"
       />
       <Button
         label="Delete User(s)"
         :disabled="disableButtons"
-        class="p-button-rounded p-button-danger mx-1"
+        class="p-button-danger mx-1"
       />
     </div>
 

@@ -2,14 +2,17 @@
   import { onMounted, ref } from "vue";
   import TableHeader from "./components/TableHeader.vue";
   import { instance as axios } from "./services/axios_instance";
-  import AddUserForm from "./components/addUserForm.vue";
+  import FormDialog from "./components/FormDialog.vue";
   import DetailsSidebar from "./components/DetailsSidebar.vue";
+
+  const loading = ref(true);
 
   const users = ref([]);
   onMounted(() => {
     axios.get("/users")
       .then(res => users.value = res.data)
       .catch(err => console.log("Oops: ", err)) // TODO: Handle error
+      .finally(() => loading.value = false) 
   })
 
   const selectedUsers = ref([]);
@@ -52,16 +55,7 @@
     </Column>
   </DataTable>
 
-  <Dialog modal dismissableMask closeOnEscape :breakpoints="{'960px': '75vw', '640px': '100vw'}" :style="{width: '50vw'}" v-model:visible="openAddUserDialog">
-    <template #header>
-      <div class="flex-column">
-        <h3>Create New User</h3>
-        <p class="my-0">Fields marked with * are required.</p>
-      </div>
-    </template>
-
-    <AddUserForm class="mt-3" @addNewUser="[addNewUser($event), openAddUserDialog = false]" @closeAddUserDialog="openAddUserDialog = false"></AddUserForm>
-  </Dialog>
+  <FormDialog :title="'Add a User'" :form="'addUser'" v-model="openAddUserDialog"></FormDialog>
   <DetailsSidebar v-model="openDetailsSidebar" :userData="selectedUsers"></DetailsSidebar>
 </template>
 

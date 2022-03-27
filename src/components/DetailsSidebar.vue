@@ -20,9 +20,8 @@ const props = defineProps({
     @hide="$emit('update:modelValue', false)"
     dismissable
     position="right"
-    class="p-sidebar-right p-sidebar-lg"
+    class="p-sidebar-right"
   >
-    <!-- <h2 class="p-card-title">User Details</h2> -->
     <div class="p-card-content">
       <UserDetailsCard v-for="user in userData" :key="user.id" :user="user"></UserDetailsCard>
     </div>
