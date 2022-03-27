@@ -6,7 +6,7 @@ import { required, email } from '@vuelidate/validators'
 import FormInput from "./FormInput.vue";
 
 const props = defineProps({
-    userDetails: {
+    formData: {
         type: Object,
         required: false
     }
@@ -14,10 +14,10 @@ const props = defineProps({
 const emit = defineEmits(['userDetailsFormSubmit', 'userDetailsFormClose']);
 
 onBeforeMount(() => {
-    if (props.userDetails) {
+    if (props.formData) {
         const inputKeys = Object.keys(inputs.value);
         inputKeys.forEach(key => {
-            inputs.value[key] = props.userDetails[key];
+            inputs.value[key] = props.formData[key];
         })
     }
 })
@@ -145,14 +145,14 @@ const onSubmit = (isFormValid) => {
             <FormInput
                 :name="key"
                 :submitted="submitted"
-                v-model="inputs[key]"
+                v-model="v$[key].$model"
                 :validations="v$[key]"
                 :type="'text'"
             ></FormInput>
         </span>
 
         <div class="ml-auto mr-2">
-            <Button label="Cancel" @click="$emit('closeAddUserDialog')" class="p-button-text" />
+            <Button label="Cancel" @click="$emit('cancel')" class="p-button-text" />
             <Button label="Submit" type="submit" />
         </div>
     </form>

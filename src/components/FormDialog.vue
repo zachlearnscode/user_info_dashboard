@@ -41,7 +41,7 @@ const props = defineProps({
       <UserDetailsForm v-if="form === 'addUser'">
         <!-- TODO: Require events to emit -->
       </UserDetailsForm>
-      <UserDetailsForm v-else-if="form = 'editUser'" :userDetails="formData"></UserDetailsForm>
+      <UserDetailsForm v-else-if="form = 'editUser'" :formData="formData" @cancel="$emit('cancel')"></UserDetailsForm>
 
   </Dialog>
 </template>

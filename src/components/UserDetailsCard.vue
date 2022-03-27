@@ -63,5 +63,5 @@ const getFormData = () => {
     </template>
   </Card>
 
-  <FormDialog :title="'Edit User'" v-model="openEditUserDialog" :form="'editUser'" :formData="getFormData()"></FormDialog>
+  <FormDialog :title="`Edit User ${user.name}`" v-model="openEditUserDialog" :form="'editUser'" :formData="getFormData()" @cancel="openEditUserDialog = false"></FormDialog>
 </template>
