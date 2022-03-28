@@ -1,10 +1,11 @@
 <script setup>
 import { ref, watch, onMounted } from "vue";
-import TableHeader from "./components/TableHeader.vue";
 import { instance as axios } from "./services/axios_instance";
+import { useConfirm } from "primevue/useconfirm";
+import { useMq } from "vue3-mq";
+import TableHeader from "./components/TableHeader.vue";
 import FormDialog from "./components/FormDialog.vue";
 import DetailsSidebar from "./components/DetailsSidebar.vue";
-import { useMq } from "vue3-mq";
 
 const loading = ref(true);
 const mq = useMq();
@@ -20,27 +21,8 @@ onMounted(() => {
 
 const selectedUsers = ref([]);
 
-watch(users, () => {
-
-
-
-  //   selectedUsers.value = selectedUsers.value.map(selectedUser => {
-  //     const existingUser = users.value
-  //       .find(user => user.id === selectedUser.id);
-
-  //     if (existingUser && (selectedUser !== existingUser)) {
-  //       return existingUser;
-  //     }
-
-  //     if (!users.value.find(user => user === selectedUser)) {
-  //       return undefined;
-  //     }
-  //   }).filter(selectedUser => selectedUser !== undefined)
-})
-
 watch(selectedUsers, () => {
   if (openDetailsSidebar.value === true && selectedUsers.value.length === 0) {
-    console.log("hello")
     return openDetailsSidebar.value = false;
   }
 })
@@ -101,8 +83,30 @@ const updateUserDetails = (event) => {
 
 }
 
-const deleteUser = (userId) => {
-  return users.value.filter(user => user.id !== userId);
+const deleteUser = (id) => {
+  axios.delete(`/users/${id}`)
+    .then(res => {
+      if (res.status === 200) {
+        users.value = users.value.filter(user => user.id !== id)
+        selectedUsers.value = selectedUsers.value.filter(selectedUser => selectedUser.id !== id)
+      }
+    })
+    .catch(err => console.log("Error deleting user: ", err))
+}
+
+const confirm = useConfirm();
+const requestConfirm = (userId) => {confirm.require({
+    message: 'Are you sure you want to proceed?',
+    header: 'Delete User',
+    icon: 'pi pi-exclamation-triangle',
+    acceptClass: 'p-button-danger',
+    accept: () => {
+      deleteUser(userId)
+    },
+    reject: () => {
+      confirm.close();
+    }
+  });
 }
 </script>
 
@@ -155,8 +159,9 @@ const deleteUser = (userId) => {
     v-model="openDetailsSidebar"
     :userData="selectedUsers"
     @userDetailsFormSubmitted="updateUserDetails($event)"
-    @deleteUser="[selectedUsers = selectedUsers.filter(su => su.id !== $event), users = deleteUser($event)]"
+    @deleteRequested="requestConfirm($event)"
   ></DetailsSidebar>
+   <ConfirmDialog></ConfirmDialog>
 </template>
 
 <style>

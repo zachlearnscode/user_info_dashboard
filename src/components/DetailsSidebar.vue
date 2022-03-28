@@ -13,7 +13,7 @@ const props = defineProps({
   }
 })
 
-const emits = defineEmits(['userDetailsFormSubmitted', 'deleteUser']);
+const emits = defineEmits(['userDetailsFormSubmitted', 'deleteRequested', 'update:modelValue']);
 </script>
 
 <template>
@@ -30,7 +30,7 @@ const emits = defineEmits(['userDetailsFormSubmitted', 'deleteUser']);
         :key="user.id"
         :user="user"
         @userDetailsFormSubmitted="$emit('userDetailsFormSubmitted', $event)"
-        @deleteUser="$emit('deleteUser', $event)"
+        @deleteRequested="$emit('deleteRequested', $event)"
       ></UserDetailsCard>
     </div>
   </Sidebar>
