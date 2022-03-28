@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from "vue";
+import { computed } from "vue";
 import ListItem from "./ListItem.vue";
 
 const props = defineProps({
@@ -9,6 +9,7 @@ const props = defineProps({
   }
 })
 
+// filteredListItems removes id, name and depth key/values from prop listItems so they won't be displayed in the list.
 const filteredListItems = computed(() => {
   const entries = Object.entries(props.listItems);
   

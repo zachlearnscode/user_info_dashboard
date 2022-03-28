@@ -1,5 +1,4 @@
 <script setup>
-import { ref, computed } from "vue";
 import List from "./List.vue";
 
 const props = defineProps({
@@ -35,5 +34,6 @@ const isObject = (value) => {
   <template v-else>
     <div :class="`ml-${depth * 2} font-bold`">{{name}}</div>
     <List :listItems="value"></List>
+    <!-- Above is recursive call to List component to display nested object key/value pairs -->
   </template>
 </template>

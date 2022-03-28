@@ -1,6 +1,5 @@
 <script setup>
 import { ref, computed } from "vue";
-
 import List from "./List.vue";
 import FormDialog from "./FormDialog.vue";
 
@@ -11,7 +10,7 @@ const props = defineProps({
   }
 })
 
-const emits = defineEmits(['userDetailsFormSubmitted', 'deleteRequested']);
+defineEmits(['userDetailsFormSubmitted', 'deleteRequested']);
 
 const openEditUserDialog = ref(false);
 
@@ -29,25 +28,6 @@ const getDepth = (obj, count = 1) => {
   }
   return obj;
 }
-
-const getFormData = () => {
-  const u = props.user;
-
-  return {
-    name: u.name,
-    username: u.username,
-    email: u.email,
-    street: u.address.street,
-    suite: u.address.suite,
-    city: u.address.city,
-    zip_code: u.address.zipcode,
-    phone: u.phone,
-    website: u.website,
-    company_name: u.company.name,
-    company_motto: u.company.catchPhrase
-  }
-}
-
 </script>
 
 <template>
@@ -61,17 +41,10 @@ const getFormData = () => {
     <template #footer>
       <div class="flex">
         <Button label="Delete User" @click="$emit('deleteRequested', user.id)" class="w-full p-button-danger" />
-        <Button
-          label="Edit User"
-          @click="openEditUserDialog = true"
-          class="w-full p-button-primary"
-          style="margin-left: .5em"
-        />
+        <Button label="Edit User" @click="openEditUserDialog = true" class="w-full p-button-primary ml-1" />
       </div>
     </template>
   </Card>
-
- 
 
   <FormDialog
     :title="`Edit User ${user.name}`"

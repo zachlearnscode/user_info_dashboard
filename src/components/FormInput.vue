@@ -52,7 +52,6 @@ const toTitleCase = (str) => {
 </script>
 
 <template>
-  <!-- v-model on component prevents floating label from returning to input when input has content  -->
   <InputText
     :value="modelValue"
     @input="$emit('update:modelValue', $event.target.value)"

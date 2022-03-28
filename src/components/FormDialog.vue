@@ -1,11 +1,9 @@
 <script setup>
 import { ref, computed } from "vue";
-import UserDetailsForm from "./UserDetailsForm.vue";
 import { useMq } from "vue3-mq";
+import UserDetailsForm from "./UserDetailsForm.vue";
+
 const mq = useMq();
-
-const formDialog = ref();
-
 const props = defineProps({
   title: {
     type: String,
@@ -25,7 +23,7 @@ const props = defineProps({
   }
 })
 
-const emits = defineEmits(['userDetailsFormSubmitted', 'cancel']);
+defineEmits(['userDetailsFormSubmitted', 'cancel']);
 
 const formData = computed(() => {
   if (props.userData) {
@@ -57,7 +55,9 @@ const userID = computed(() => {
   return null;
 })
 
-// Unfortunately, PrimeVue dialogs don't have a fullscreen property.
+
+const formDialog = ref();
+// PrimeVue dialogs don't have a fullscreen property, but are 'maximizeable'
 // This is kind of a hacky workaround to make dialog full screen below md breakpoint.
 const evaluateMaximize = () => {
   if (!mq.mdPlus) {
@@ -69,7 +69,6 @@ const evaluateMaximize = () => {
 <template>
   <Dialog
     modal
-    dismissableMask
     closeOnEscape
     :breakpoints="{ '960px': '75vw', '640px': '100vw' }"
     :style="{ width: '50vw' }"
@@ -87,9 +86,7 @@ const evaluateMaximize = () => {
         <p class="my-0">Fields marked with * are required</p>
       </div>
     </template>
-
     <UserDetailsForm
-      v-if="formType === 'addUser' || formType === 'editUser'"
       :formType="formType"
       :formData="formData"
       :userID="userID"

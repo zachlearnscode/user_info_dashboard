@@ -1,10 +1,11 @@
 <script setup>
 import { useMq } from "vue3-mq";
-const mq = useMq();
 
+const mq = useMq();
 const props = defineProps({
   disableButtons: Boolean
 })
+defineEmits(['openSidebar', 'openAddUserDialog']);
 
 
 
@@ -20,7 +21,7 @@ const props = defineProps({
         icon="pi pi-info-circle"
         :disabled="disableButtons"
         class="p-button-info mx-1"
-        @click="$emit('openDetailsSidebar')"
+        @click="$emit('openSidebar')"
       />
     </div>
 

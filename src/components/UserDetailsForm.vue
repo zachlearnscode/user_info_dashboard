@@ -1,9 +1,9 @@
 <script setup>
 import { ref, computed, onBeforeMount } from "vue";
 import { instance as axios } from "../services/axios_instance";
+import { required, email, url } from '@vuelidate/validators'
 import UserPrototype from "../services/user_prototype";
 import useVuelidate from '@vuelidate/core'
-import { required, email, url } from '@vuelidate/validators'
 import FormInput from "./FormInput.vue";
 
 const props = defineProps({
@@ -73,13 +73,13 @@ const disableSubmit = computed(() => {
     return false;
 })
 
-const submitted = ref(false);
+const submitted = ref(false); // Triggers validations
 
 const onSubmit = (isFormValid) => {
     submitted.value = true;
 
     if (isFormValid) {
-        const inputValues = Object.values(inputs.value);
+        const inputValues = Object.values(inputs.value); //Creates array from values from inputs object for easy creation of new User object
         switch (props.formType) {
             case 'addUser': {
                 postNewUser(formatInputs(inputValues));
@@ -100,24 +100,22 @@ const formatInputs = (arr) => {
 const postNewUser = (userObj) => {
     axios.post("/users", userObj)
         .then(res => {
-            //Should I be checking status codes?
             const userData = res.data;
             emit('userDetailsFormSubmitted', userData);
         })
-        .catch(err => console.log("Error in addUserForm: ", err))
+        .catch(err => console.log("Error posting new user: ", err))
 }
 
 const patchExistingUser = (userObj, id) => {
     axios.patch(`/users/${id}`, userObj)
         .then(res => {
-            //Should I be checking status codes?
             const userData = res.data;
             emit('userDetailsFormSubmitted', userData);
         })
-        .catch(err => console.log("Error in addUserForm: ", err))
+        .catch(err => console.log("Error patching existing user: ", err))
 }
 
-
+// Placed responsive input classes in script to use v-for in template
 const inputClasses = ref({
     name: "col-12",
     username: "col-12 md:col-6",
