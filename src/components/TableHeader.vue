@@ -19,11 +19,6 @@
         class="p-button-info mx-1"
         @click="$emit('openDetailsSidebar')"
       />
-      <Button
-        label="Delete User(s)"
-        :disabled="disableButtons"
-        class="p-button-danger mx-1"
-      />
     </div>
 
     <span class="p-input-icon-left">

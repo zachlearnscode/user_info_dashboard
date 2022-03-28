@@ -1,5 +1,5 @@
 <script setup>
-  import { onMounted, ref } from "vue";
+  import { ref, watch, onMounted } from "vue";
   import TableHeader from "./components/TableHeader.vue";
   import { instance as axios } from "./services/axios_instance";
   import FormDialog from "./components/FormDialog.vue";
@@ -8,6 +8,7 @@
   const loading = ref(true);
 
   const users = ref([]);
+
   onMounted(() => {
     axios.get("/users")
       .then(res => users.value = res.data)
@@ -16,6 +17,27 @@
   })
 
   const selectedUsers = ref([]);
+
+  watch(users, () => {
+    selectedUsers.value = selectedUsers.value.map(selectedUser => {
+      const existingUser = users.value
+        .find(user => user.id === selectedUser.id);
+
+      if (existingUser && selectedUser !== existingUser) {
+        return existingUser;
+      }
+
+      if (!users.value.find(user => user === selectedUser)) {
+        return undefined;
+      }
+    }).filter(selectedUser => selectedUser !== undefined)
+  })
+
+  watch(selectedUsers, () => {
+    if (openDetailsSidebar.value && !selectedUsers.value.length) {
+      return openDetailsSidebar.value = false;
+    }
+  })
 
   const openAddUserDialog = ref(false);
   const openDetailsSidebar = ref(false);
@@ -72,6 +94,10 @@
 
 
   }
+
+  const deleteUser = (userId) => {
+    return users.value.filter(user => user.id !== userId);
+  }
 </script>
 
 <template>
@@ -103,7 +129,7 @@
   </DataTable>
 
   <FormDialog :title="'Add a User'" :form="'addUser'" v-model="openAddUserDialog"></FormDialog>
-  <DetailsSidebar v-model="openDetailsSidebar" :userData="selectedUsers" @userDetailsFormSubmitted="updateUserDetails($event)"></DetailsSidebar>
+  <DetailsSidebar v-model="openDetailsSidebar" :userData="selectedUsers" @userDetailsFormSubmitted="updateUserDetails($event)" @deleteUser="users = deleteUser($event)"></DetailsSidebar>
 </template>
 
 <style>

@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed } from "vue";
+import { instance as axios } from "../services/axios_instance";
 import List from "./List.vue";
 import FormDialog from "./FormDialog.vue";
 
@@ -11,7 +12,7 @@ const props = defineProps({
   }
 })
 
-const emits = defineEmits(['userDetailsFormSubmitted']);
+const emits = defineEmits(['userDetailsFormSubmitted', 'deleteUser']);
 
 const openEditUserDialog = ref(false);
 
@@ -47,6 +48,16 @@ const getFormData = () => {
     company_motto: u.company.catchPhrase
   }
 }
+
+const deleteUser = (id) => {
+  axios.delete(`/users/${id}`)
+    .then(res => {
+      if (res.status === 200) {
+        emits('deleteUser', id)
+      }
+    })
+    .catch(err => console.log("Error deleting user: ", err))
+}
 </script>
 
 <template>
@@ -59,7 +70,7 @@ const getFormData = () => {
     </template>
     <template #footer>
       <div class="flex">
-        <Button label="Delete User" class="w-full p-button-danger" />
+        <Button label="Delete User" @click="deleteUser(user.id)" class="w-full p-button-danger" />
         <Button
           label="Edit User"
           @click="openEditUserDialog = true"
@@ -78,4 +89,6 @@ const getFormData = () => {
     @cancel="openEditUserDialog = false"
     @userDetailsFormSubmitted="[$emit('userDetailsFormSubmitted' ,$event), openEditUserDialog = false]"
   ></FormDialog>
+
+  <!-- TODO: Add confirmDialog for delete -->
 </template>

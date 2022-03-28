@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, onBeforeMount } from "vue";
 import { instance as axios } from "../services/axios_instance";
+import UserPrototype from "../services/user_prototype";
 import useVuelidate from '@vuelidate/core'
 import { required, email, url } from '@vuelidate/validators'
 import FormInput from "./FormInput.vue";
@@ -19,19 +20,8 @@ const props = defineProps({
         required: false
     }
 })
+
 const emit = defineEmits(['userDetailsFormSubmitted']);
-
-onBeforeMount(() => {
-    if (props.formData) {
-        const inputKeys = Object.keys(inputs.value);
-        inputKeys.forEach(key => {
-            inputs.value[key] = props.formData[key];
-        })
-    }
-})
-
-const submitted = ref(false);
-
 
 const inputs = ref({
     name: "",
@@ -47,20 +37,6 @@ const inputs = ref({
     company_motto: ""
 
 });
-
-const inputClasses = ref({
-    name: "col-12",
-    username: "col-12 md:col-6",
-    email: "col-12 md:col-6",
-    street: "col-8 md:col-9",
-    suite: "col-4 md:col-3",
-    city: "col-8 md:col-9",
-    zip_code: "col-4 md:col-3",
-    phone: "col-12 md:col-6",
-    website: "col-12 md:col-6",
-    company_name: "col-12 md:col-7",
-    company_motto: "col-12 md:col-5"
-})
 
 const validations = () => {
     return {
@@ -80,6 +56,15 @@ const validations = () => {
 
 const v$ = useVuelidate(validations, inputs.value);
 
+onBeforeMount(() => {
+    if (props.formData) {
+        const inputKeys = Object.keys(inputs.value);
+        inputKeys.forEach(key => {
+            inputs.value[key] = props.formData[key];
+        })
+    }
+})
+
 const disableSubmit = computed(() => {
     if (props.formType === 'editUser') {
         return !v$.value.$anyDirty; // Prevents user from resubmitting form without changing any values
@@ -88,51 +73,28 @@ const disableSubmit = computed(() => {
     return false;
 })
 
-const formatInputs = (obj) => {
-    const result = {
-        address: { geo: { lat: null, lng: null } },
-        company: { bs: null }
+const submitted = ref(false);
+
+const formatInputs = (arr) => {
+    return new UserPrototype(...arr);
+}
+
+const onSubmit = (isFormValid) => {
+    submitted.value = true;
+
+    if (isFormValid) {
+        switch (props.formType) {
+            case 'addUser': {
+                postNewUser(formatInputs(inputs.value));
+                break;
+            }
+            case 'editUser': {
+                const inputValues = Object.values(inputs.value);
+                patchExistingUser(formatInputs(inputValues), props.userID);
+                break;
+            }
+        }
     }
-
-    const entries = Object.entries(obj);
-    const entriesWithNulls = entries.map(entry => {
-        let [key, value] = entry;
-        if (value === "") {
-            value = null;
-        }
-        return [key, value];
-    })
-
-    entriesWithNulls.forEach(entry => {
-        let [key, value] = entry;
-
-        if (key.includes("_")) {
-            key = key.split("_").join("");
-        }
-
-        switch (key) {
-            case "street":
-            case "suite":
-            case "city":
-            case "zipcode": {
-                result.address[key] = value;
-                break;
-            }
-            case "companyname": {
-                result.company["name"] = value;
-                break;
-            }
-            case "companymotto": {
-                result.company["catchPhrase"] = value;
-                break;
-            }
-            default: {
-                result[key] = value;
-            }
-        }
-    })
-
-    return result;
 }
 
 const postNewUser = (userObj) => {
@@ -154,24 +116,21 @@ const patchExistingUser = (userObj, id) => {
         })
         .catch(err => console.log("Error in addUserForm: ", err))
 }
-const onSubmit = (isFormValid) => {
-    submitted.value = true;
 
-    if (isFormValid) {
-        switch (props.formType) {
-            case 'addUser': {
-                postNewUser(formatInputs(inputs.value));
-                break;
-            }
-            case 'editUser': {
-                patchExistingUser(formatInputs(inputs.value), props.userID);
-                break;
-            }
-        }
 
-    }
-}
-
+const inputClasses = ref({
+    name: "col-12",
+    username: "col-12 md:col-6",
+    email: "col-12 md:col-6",
+    street: "col-8 md:col-9",
+    suite: "col-4 md:col-3",
+    city: "col-8 md:col-9",
+    zip_code: "col-4 md:col-3",
+    phone: "col-12 md:col-6",
+    website: "col-12 md:col-6",
+    company_name: "col-12 md:col-7",
+    company_motto: "col-12 md:col-5"
+})
 </script>
 
 <template>

@@ -15,6 +15,7 @@ import InputText from 'primevue/inputtext';
 import Dialog from 'primevue/dialog';
 import Sidebar from 'primevue/sidebar';
 import Card from 'primevue/card';
+import ConfirmDialog from 'primevue/confirmdialog';
 
 // PrimeFlex CSS
 import '/node_modules/primeflex/primeflex.css';
@@ -31,5 +32,6 @@ app.component('InputText', InputText);
 app.component('Dialog', Dialog);
 app.component('Sidebar', Sidebar);
 app.component('Card', Card);
+app.component('ConfirmDialog', ConfirmDialog);
 
 app.mount('#app');

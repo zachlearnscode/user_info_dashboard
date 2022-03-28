@@ -71,7 +71,6 @@ const userID = computed(() => {
       @cancel="$emit('cancel')"
       @userDetailsFormSubmitted="$emit('userDetailsFormSubmitted', $event)"
     >
-      <!-- TODO: Require events to emit -->
     </UserDetailsForm>
   </Dialog>
 </template>
