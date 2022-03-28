@@ -107,6 +107,4 @@ const getFormData = () => {
     @cancel="openEditUserDialog = false"
     @userDetailsFormSubmitted="[$emit('userDetailsFormSubmitted', $event), openEditUserDialog = false]"
   ></FormDialog>
-
-  <!-- TODO: Add confirmDialog for delete -->
 </template>
