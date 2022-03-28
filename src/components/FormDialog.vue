@@ -1,6 +1,10 @@
 <script setup>
-import { computed } from "vue";
+import { ref, computed } from "vue";
 import UserDetailsForm from "./UserDetailsForm.vue";
+import { useMq } from "vue3-mq";
+const mq = useMq();
+
+const formDialog = ref();
 
 const props = defineProps({
   title: {
@@ -21,29 +25,45 @@ const props = defineProps({
   }
 })
 
-const emits = defineEmits(['userDetailsFormSubmitted']);
+const emits = defineEmits(['userDetailsFormSubmitted', 'cancel']);
 
 const formData = computed(() => {
-  const u = props.userData;
+  if (props.userData) {
+    const u = props.userData;
 
-  return {
-    name: u.name,
-    username: u.username,
-    email: u.email,
-    street: u.address.street,
-    suite: u.address.suite,
-    city: u.address.city,
-    zip_code: u.address.zipcode,
-    phone: u.phone,
-    website: u.website,
-    company_name: u.company.name,
-    company_motto: u.company.catchPhrase
+    return {
+      name: u.name,
+      username: u.username,
+      email: u.email,
+      street: u.address.street,
+      suite: u.address.suite,
+      city: u.address.city,
+      zip_code: u.address.zipcode,
+      phone: u.phone,
+      website: u.website,
+      company_name: u.company.name,
+      company_motto: u.company.catchPhrase
+    }
   }
+
+  return null;
 })
 
 const userID = computed(() => {
-  return props.userData.id;
+  if (props.userData) {
+    return props.userData.id;
+  }
+
+  return null;
 })
+
+// Unfortunately, PrimeVue dialogs don't have a fullscreen property.
+// This is kind of a hacky workaround to make dialog full screen below md breakpoint.
+const evaluateMaximize = () => {
+  if (!mq.mdPlus) {
+    formDialog.value.maximize();
+  }
+}
 </script>
 
 <template>
@@ -54,7 +74,12 @@ const userID = computed(() => {
     :breakpoints="{ '960px': '75vw', '640px': '100vw' }"
     :style="{ width: '50vw' }"
     v-model:visible="modelValue"
-    @hide="$emit('update:modelValue', false)"
+    @show="evaluateMaximize"
+    @hide="[$emit('update:modelValue', false), formDialog.maximized = false]"
+    @unmaximize="formDialog.maximized = false"
+    maximizable
+    ref="formDialog"
+    class="fadeindown"
   >
     <template #header>
       <div class="flex-column">
@@ -70,7 +95,6 @@ const userID = computed(() => {
       :userID="userID"
       @cancel="$emit('cancel')"
       @userDetailsFormSubmitted="$emit('userDetailsFormSubmitted', $event)"
-    >
-    </UserDetailsForm>
+    ></UserDetailsForm>
   </Dialog>
 </template>

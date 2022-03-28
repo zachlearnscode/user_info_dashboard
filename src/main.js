@@ -20,10 +20,22 @@ import ConfirmDialog from 'primevue/confirmdialog';
 // PrimeFlex CSS
 import '/node_modules/primeflex/primeflex.css';
 
+// Vue3 MQ for accessing breakpoints
+import { Vue3Mq } from "vue3-mq";
+
 
 const app = createApp(App);
 
 app.use(PrimeVue);
+app.use(Vue3Mq, {
+  breakpoints: {
+    xs: '0px',
+    sm: '576px',
+    md: '768px',
+    lg: '992px',
+    xl: '1200px'
+  }
+});
 
 app.component('DataTable', DataTable);
 app.component('Column', Column);

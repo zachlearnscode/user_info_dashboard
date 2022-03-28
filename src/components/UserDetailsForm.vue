@@ -75,21 +75,17 @@ const disableSubmit = computed(() => {
 
 const submitted = ref(false);
 
-const formatInputs = (arr) => {
-    return new UserPrototype(...arr);
-}
-
 const onSubmit = (isFormValid) => {
     submitted.value = true;
 
     if (isFormValid) {
+        const inputValues = Object.values(inputs.value);
         switch (props.formType) {
             case 'addUser': {
-                postNewUser(formatInputs(inputs.value));
+                postNewUser(formatInputs(inputValues));
                 break;
             }
             case 'editUser': {
-                const inputValues = Object.values(inputs.value);
                 patchExistingUser(formatInputs(inputValues), props.userID);
                 break;
             }
@@ -97,12 +93,16 @@ const onSubmit = (isFormValid) => {
     }
 }
 
+const formatInputs = (arr) => {
+    return new UserPrototype(...arr);
+}
+
 const postNewUser = (userObj) => {
     axios.post("/users", userObj)
         .then(res => {
             //Should I be checking status codes?
-            // const newUser = res.data;
-            // emit('addNewUser', newUser);
+            const userData = res.data;
+            emit('userDetailsFormSubmitted', userData);
         })
         .catch(err => console.log("Error in addUserForm: ", err))
 }
@@ -147,6 +147,7 @@ const inputClasses = ref({
                 v-model="v$[key].$model"
                 :validations="v$[key]"
                 :type="'text'"
+                :autofocus="formType === 'addUser' && key === 'name'"
             ></FormInput>
         </span>
 
