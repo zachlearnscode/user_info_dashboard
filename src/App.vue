@@ -24,7 +24,54 @@
     users.value.push(user);
   };
 
-  
+  const updateUserDetails = (event) => {
+    const existingUserData = users.value
+      .find(user => user.id === event.id);
+    const newUserData = Object.entries(event);
+
+    newUserData.forEach(pair => {
+      const [key, value] = pair;
+
+      switch (key) {
+        case "username":
+        case "website":
+        case "phone":
+        case "name":
+        case "email": {
+          existingUserData[key] = value;
+          break;
+        }
+        case "suite":
+        case "city":
+        case "street": {
+          existingUserData.address[key] = value;
+          break;
+        }
+        case "zip_code": {
+          existingUserData.address.zipcode = value;
+          break;
+        }
+        case "company_name": {
+          existingUserData.company.name = value;
+          break;
+        }
+        case "company_motto": {
+          existingUserData.company.catchPhrase = value;
+          break;
+        }
+        default: {
+          break;
+        }
+      }
+    })
+    
+    
+    let newUsers = users.value.filter(user => user.id !== newUserData.id);
+
+    return users.value = newUsers
+
+
+  }
 </script>
 
 <template>
@@ -56,7 +103,7 @@
   </DataTable>
 
   <FormDialog :title="'Add a User'" :form="'addUser'" v-model="openAddUserDialog"></FormDialog>
-  <DetailsSidebar v-model="openDetailsSidebar" :userData="selectedUsers"></DetailsSidebar>
+  <DetailsSidebar v-model="openDetailsSidebar" :userData="selectedUsers" @userDetailsFormSubmitted="updateUserDetails($event)"></DetailsSidebar>
 </template>
 
 <style>

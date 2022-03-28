@@ -12,6 +12,8 @@ const props = defineProps({
     required: true
   }
 })
+
+const emits = defineEmits(['userDetailsFormSubmitted']);
 </script>
 
 <template>
@@ -20,10 +22,15 @@ const props = defineProps({
     @hide="$emit('update:modelValue', false)"
     dismissable
     position="right"
-    class="p-sidebar-right"
+    class="p-sidebar-right p-sidebar-md"
   >
     <div class="p-card-content">
-      <UserDetailsCard v-for="user in userData" :key="user.id" :user="user"></UserDetailsCard>
+      <UserDetailsCard
+        v-for="user in userData"
+        :key="user.id"
+        :user="user"
+        @userDetailsFormSubmitted="$emit('userDetailsFormSubmitted', $event)"
+      ></UserDetailsCard>
     </div>
   </Sidebar>
 </template>

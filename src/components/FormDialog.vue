@@ -1,4 +1,5 @@
 <script setup>
+import { computed } from "vue";
 import UserDetailsForm from "./UserDetailsForm.vue";
 
 const props = defineProps({
@@ -10,14 +11,38 @@ const props = defineProps({
     type: Boolean,
     required: true
   },
-  form: {
+  formType: {
     type: String,
     required: true
   },
-  formData: {
+  userData: {
     type: Object,
     required: false
   }
+})
+
+const emits = defineEmits(['userDetailsFormSubmitted']);
+
+const formData = computed(() => {
+  const u = props.userData;
+
+  return {
+    name: u.name,
+    username: u.username,
+    email: u.email,
+    street: u.address.street,
+    suite: u.address.suite,
+    city: u.address.city,
+    zip_code: u.address.zipcode,
+    phone: u.phone,
+    website: u.website,
+    company_name: u.company.name,
+    company_motto: u.company.catchPhrase
+  }
+})
+
+const userID = computed(() => {
+  return props.userData.id;
 })
 </script>
 
@@ -38,10 +63,15 @@ const props = defineProps({
       </div>
     </template>
 
-      <UserDetailsForm v-if="form === 'addUser'">
-        <!-- TODO: Require events to emit -->
-      </UserDetailsForm>
-      <UserDetailsForm v-else-if="form = 'editUser'" :formData="formData" @cancel="$emit('cancel')"></UserDetailsForm>
-
+    <UserDetailsForm
+      v-if="formType === 'addUser' || formType === 'editUser'"
+      :formType="formType"
+      :formData="formData"
+      :userID="userID"
+      @cancel="$emit('cancel')"
+      @userDetailsFormSubmitted="$emit('userDetailsFormSubmitted', $event)"
+    >
+      <!-- TODO: Require events to emit -->
+    </UserDetailsForm>
   </Dialog>
 </template>

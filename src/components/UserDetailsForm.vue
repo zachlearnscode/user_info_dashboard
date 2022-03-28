@@ -2,16 +2,24 @@
 import { ref, computed, onBeforeMount } from "vue";
 import { instance as axios } from "../services/axios_instance";
 import useVuelidate from '@vuelidate/core'
-import { required, email } from '@vuelidate/validators'
+import { required, email, url } from '@vuelidate/validators'
 import FormInput from "./FormInput.vue";
 
 const props = defineProps({
+    formType: {
+        type: String,
+        required: true
+    },
     formData: {
         type: Object,
         required: false
+    },
+    userID: {
+        type: Number,
+        required: false
     }
 })
-const emit = defineEmits(['userDetailsFormSubmit', 'userDetailsFormClose']);
+const emit = defineEmits(['userDetailsFormSubmitted']);
 
 onBeforeMount(() => {
     if (props.formData) {
@@ -23,6 +31,7 @@ onBeforeMount(() => {
 })
 
 const submitted = ref(false);
+
 
 const inputs = ref({
     name: "",
@@ -63,7 +72,7 @@ const validations = () => {
         city: {},
         zip_code: {},
         phone: { required },
-        website: { required },
+        website: { required, url },
         company_name: { required },
         company_motto: {}
     }
@@ -71,10 +80,18 @@ const validations = () => {
 
 const v$ = useVuelidate(validations, inputs.value);
 
+const disableSubmit = computed(() => {
+    if (props.formType === 'editUser') {
+        return !v$.value.$anyDirty; // Prevents user from resubmitting form without changing any values
+    }
+
+    return false;
+})
+
 const formatInputs = (obj) => {
     const result = {
-        address: {geo: {lat: null, lng: null}},
-        company: {bs: null}
+        address: { geo: { lat: null, lng: null } },
+        company: { bs: null }
     }
 
     const entries = Object.entries(obj);
@@ -93,7 +110,7 @@ const formatInputs = (obj) => {
             key = key.split("_").join("");
         }
 
-        switch(key) {
+        switch (key) {
             case "street":
             case "suite":
             case "city":
@@ -118,17 +135,40 @@ const formatInputs = (obj) => {
     return result;
 }
 
+const postNewUser = (userObj) => {
+    axios.post("/users", userObj)
+        .then(res => {
+            //Should I be checking status codes?
+            // const newUser = res.data;
+            // emit('addNewUser', newUser);
+        })
+        .catch(err => console.log("Error in addUserForm: ", err))
+}
+
+const patchExistingUser = (userObj, id) => {
+    axios.patch(`/users/${id}`, userObj)
+        .then(res => {
+            //Should I be checking status codes?
+            const userData = res.data;
+            emit('userDetailsFormSubmitted', userData);
+        })
+        .catch(err => console.log("Error in addUserForm: ", err))
+}
 const onSubmit = (isFormValid) => {
     submitted.value = true;
 
     if (isFormValid) {
-        axios.post("/users", formattedInputs.value)
-            .then(res => {
-                //Should I be checking status codes?
-                const newUser = res.data;
-                emit('addNewUser', newUser);
-            })
-            .catch(err => console.log("Error in addUserForm: ", err))
+        switch (props.formType) {
+            case 'addUser': {
+                postNewUser(formatInputs(inputs.value));
+                break;
+            }
+            case 'editUser': {
+                patchExistingUser(formatInputs(inputs.value), props.userID);
+                break;
+            }
+        }
+
     }
 }
 
@@ -153,7 +193,7 @@ const onSubmit = (isFormValid) => {
 
         <div class="ml-auto mr-2">
             <Button label="Cancel" @click="$emit('cancel')" class="p-button-text" />
-            <Button label="Submit" type="submit" />
+            <Button label="Submit" type="submit" :disabled="disableSubmit" />
         </div>
     </form>
 </template>

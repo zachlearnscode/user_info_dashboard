@@ -11,6 +11,8 @@ const props = defineProps({
   }
 })
 
+const emits = defineEmits(['userDetailsFormSubmitted']);
+
 const openEditUserDialog = ref(false);
 
 const listItems = computed(() => {
@@ -58,10 +60,22 @@ const getFormData = () => {
     <template #footer>
       <div class="flex">
         <Button label="Delete User" class="w-full p-button-danger" />
-        <Button label="Edit User" @click="openEditUserDialog = true" class="w-full p-button-primary" style="margin-left: .5em" />
+        <Button
+          label="Edit User"
+          @click="openEditUserDialog = true"
+          class="w-full p-button-primary"
+          style="margin-left: .5em"
+        />
       </div>
     </template>
   </Card>
 
-  <FormDialog :title="`Edit User ${user.name}`" v-model="openEditUserDialog" :form="'editUser'" :formData="getFormData()" @cancel="openEditUserDialog = false"></FormDialog>
+  <FormDialog
+    :title="`Edit User ${user.name}`"
+    v-model="openEditUserDialog"
+    :formType="'editUser'"
+    :userData="user"
+    @cancel="openEditUserDialog = false"
+    @userDetailsFormSubmitted="[$emit('userDetailsFormSubmitted' ,$event), openEditUserDialog = false]"
+  ></FormDialog>
 </template>
