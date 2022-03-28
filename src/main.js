@@ -1,6 +1,7 @@
 import { createApp } from 'vue'
 import App from './App.vue'
 import PrimeVue from 'primevue/config';
+import ConfirmationService from 'primevue/confirmationservice';
 
 // PrimeVue CSS Dependencies
 import 'primevue/resources/themes/md-light-indigo/theme.css';
@@ -36,6 +37,7 @@ app.use(Vue3Mq, {
     xl: '1200px'
   }
 });
+app.use(ConfirmationService);
 
 app.component('DataTable', DataTable);
 app.component('Column', Column);

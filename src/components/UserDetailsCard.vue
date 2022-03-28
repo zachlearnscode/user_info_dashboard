@@ -1,9 +1,9 @@
 <script setup>
 import { ref, computed } from "vue";
 import { instance as axios } from "../services/axios_instance";
+import { useConfirm } from "primevue/useconfirm";
 import List from "./List.vue";
 import FormDialog from "./FormDialog.vue";
-
 
 const props = defineProps({
   user: {
@@ -15,6 +15,31 @@ const props = defineProps({
 const emits = defineEmits(['userDetailsFormSubmitted', 'deleteUser']);
 
 const openEditUserDialog = ref(false);
+
+const confirm = useConfirm();
+const requestConfirm = () => {confirm.require({
+    message: 'Are you sure you want to proceed?',
+    header: 'Delete User',
+    icon: 'pi pi-exclamation-triangle',
+    acceptClass: 'p-button-danger',
+    accept: () => {
+      deleteUser(props.user.id)
+    },
+    reject: () => {
+      confirm.close();
+    }
+  });
+}
+
+const deleteUser = (id) => {
+  axios.delete(`/users/${id}`)
+    .then(res => {
+      if (res.status === 200) {
+        emits('deleteUser', id)
+      }
+    })
+    .catch(err => console.log("Error deleting user: ", err))
+}
 
 const listItems = computed(() => {
   return getDepth(props.user);
@@ -49,15 +74,6 @@ const getFormData = () => {
   }
 }
 
-const deleteUser = (id) => {
-  axios.delete(`/users/${id}`)
-    .then(res => {
-      if (res.status === 200) {
-        emits('deleteUser', id)
-      }
-    })
-    .catch(err => console.log("Error deleting user: ", err))
-}
 </script>
 
 <template>
@@ -70,7 +86,7 @@ const deleteUser = (id) => {
     </template>
     <template #footer>
       <div class="flex">
-        <Button label="Delete User" @click="deleteUser(user.id)" class="w-full p-button-danger" />
+        <Button label="Delete User" @click="requestConfirm" class="w-full p-button-danger" />
         <Button
           label="Edit User"
           @click="openEditUserDialog = true"
@@ -81,13 +97,15 @@ const deleteUser = (id) => {
     </template>
   </Card>
 
+  <ConfirmDialog></ConfirmDialog>
+
   <FormDialog
     :title="`Edit User ${user.name}`"
     v-model="openEditUserDialog"
     :formType="'editUser'"
     :userData="user"
     @cancel="openEditUserDialog = false"
-    @userDetailsFormSubmitted="[$emit('userDetailsFormSubmitted' ,$event), openEditUserDialog = false]"
+    @userDetailsFormSubmitted="[$emit('userDetailsFormSubmitted', $event), openEditUserDialog = false]"
   ></FormDialog>
 
   <!-- TODO: Add confirmDialog for delete -->
